@@ -23,6 +23,12 @@ app.get('/hello',(req,res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
+//adding a second route using route parameter
+app.get('/urls/:shortURL', (req,res) => {
+  const templateVariable = {shortURL: req.params.shortURL, longURL:urlDatabase[req.params.shortURL] };
+  res.render("urls_show" , templateVariable);
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
