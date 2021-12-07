@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 //function to generate a unique shortURL
 function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-};
+}
 
 //set ejs as a view engine
 app.set('view engine','ejs');
@@ -64,12 +64,11 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   res.redirect('/urls');
 });
 
-//a request handler for submiting an updated longURL
-// app.post('/urls/:shortURL/delete', (req,res) => {
-//   const toBeDeletedURL = req.params.shortURL;
-//   delete urlDatabase[toBeDeletedURL];
-//   res.redirect('/urls');
-// });
+// a request handler for submiting an updated longURL
+app.post('/urls/:shortURL', (req,res) => {
+  const toBeEditedURL = urlDatabase[req.params.shortURL];
+  res.redirect(`/urls/${req.params.shortURL}`);
+});
 
 
 app.listen(PORT, () => {
