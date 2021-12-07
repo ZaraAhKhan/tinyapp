@@ -44,7 +44,12 @@ app.get('/urls/:shortURL', (req,res) => {
 //adding a post request handler
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let tempShortURL = generateRandomString();
+  urlDatabase[tempShortURL] = req.body.longURL;
+  console.log(urlDatabase);
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL };
+  res.render("urls_show" , templateVariable);
 });
 
 
