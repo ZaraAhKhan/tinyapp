@@ -66,8 +66,11 @@ app.post('/urls/:shortURL/delete', (req,res) => {
 
 // a request handler for submiting an updated longURL
 app.post('/urls/:shortURL', (req,res) => {
-  const toBeEditedURL = urlDatabase[req.params.shortURL];
-  res.redirect(`/urls/${req.params.shortURL}`);
+  const longURL = req.body.longURL;
+  urlDatabase[req.params.shortURL] = longURL;
+  console.log(req.body);
+  console.log(req.body.longURL);
+  res.redirect(`/urls`);
 });
 
 
