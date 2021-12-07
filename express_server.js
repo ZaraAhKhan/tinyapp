@@ -7,7 +7,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 //function to generate a unique shortURL
 function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-}
+};
 
 //set ejs as a view engine
 app.set('view engine','ejs');
@@ -47,7 +47,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-//adding a post request handler
+//adding a request handler to show the newly created shortURL
 app.post('/urls', (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
   let tempShortURL = generateRandomString();
@@ -57,11 +57,19 @@ app.post('/urls', (req, res) => {
   res.render("urls_show" , templateVariable);
 });
 
+// a request handler for deleting a resource
 app.post('/urls/:shortURL/delete', (req,res) => {
   const toBeDeletedURL = req.params.shortURL;
   delete urlDatabase[toBeDeletedURL];
   res.redirect('/urls');
 });
+
+//a request handler for submiting an updated longURL
+// app.post('/urls/:shortURL/delete', (req,res) => {
+//   const toBeDeletedURL = req.params.shortURL;
+//   delete urlDatabase[toBeDeletedURL];
+//   res.redirect('/urls');
+// });
 
 
 app.listen(PORT, () => {
