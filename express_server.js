@@ -38,10 +38,10 @@ app.get('/urls/new',(req,res) => {
 //adding a second route using route parameter
 app.get('/urls/:shortURL', (req,res) => {
   const templateVariable = {shortURL: req.params.shortURL, longURL:urlDatabase[req.params.shortURL] };
-  res.render("urls_show" , templateVariable);
+  res.render('urls_show' , templateVariable);
 });
 
-app.get("/u/:shortURL", (req, res) => {
+app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   // console.log(req.params);
   res.redirect(longURL);
@@ -54,7 +54,7 @@ app.post('/urls', (req, res) => {
   urlDatabase[tempShortURL] = req.body.longURL;
   // console.log(urlDatabase);
   const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL };
-  res.render("urls_show" , templateVariable);
+  res.render('urls_show' , templateVariable);
 });
 
 // a request handler for deleting a resource
@@ -70,7 +70,7 @@ app.post('/urls/:shortURL', (req,res) => {
   urlDatabase[req.params.shortURL] = longURL;
   console.log(req.body);
   console.log(req.body.longURL);
-  res.redirect(`/urls`);
+  res.redirect('/urls');
 });
 
 
