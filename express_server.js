@@ -57,28 +57,31 @@ const authenticateUser = function(email,password,users) {
 //sets ejs as a view engine
 app.set('view engine','ejs');
 
+//displays hello
 app.get('/', (req,res) => {
   res.send("Hello!");
 });
 
+//displays url_index page
 app.get('/urls',(req,res) => {
   const userId = req.cookies["user_id"];
   const templateVariable = {urls : urlDatabase,user:users[userId]};
   res.render('urls_index',templateVariable);
 });
 
+//displays "Hello World"
 app.get('/hello',(req,res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
-//adding a GET route to display the form to enter a new url
+//displays the form to create a new url
 app.get('/urls/new',(req,res) => {
   const userId = req.cookies["user_id"];
   const templateVariable = {user:users[userId]};
   res.render('urls_new',templateVariable);
 });
 
-//adding a second route using route parameter
+//displays the longurl and shorturl and edit form
 app.get('/urls/:shortURL', (req,res) => {
   const userId = req.cookies["user_id"];
   const templateVariable = {
@@ -86,16 +89,17 @@ app.get('/urls/:shortURL', (req,res) => {
     longURL:urlDatabase[req.params.shortURL] ,
     user:users[userId]
   };
-  res.render('urls_show' , templateVariable);
+  res.render('urls_show',templateVariable);
 });
 
+//redirects to the website on clicking the shotr url
 app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   // console.log(req.params);
   res.redirect(longURL);
 });
 
-//adding a request handler to show the newly created shortURL
+//adding a request handler to show the all urls in table format
 app.post('/urls', (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
   let tempShortURL = generateRandomString();
@@ -105,7 +109,7 @@ app.post('/urls', (req, res) => {
   res.render('urls_show' , templateVariable);
 });
 
-// a request handler for deleting a resource
+// a request handler for deleting a url
 app.post('/urls/:shortURL/delete', (req,res) => {
   const toBeDeletedURL = req.params.shortURL;
   delete urlDatabase[toBeDeletedURL];
@@ -152,7 +156,7 @@ app.get('/register',(req,res) => {
   res.render('registration_form',templateVariable);
 });
 
-//submits and validates registration form and redireests to url_index page
+//submits and validates registration form and redirects to url_index page
 app.post('/register',(req,res) => {
   const userId = generateRandomString();
   const email = req.body.email;
@@ -177,14 +181,11 @@ app.post('/register',(req,res) => {
   res.redirect('/urls');
 });
 
-//diplays the login form when login form is requested
+//displays the login form when login form is requested
 app.get('/login',(req,res) => {
   const templateVariable = {user:null};
   res.render('login_form',templateVariable);
 });
-
-
-
 
 
 app.listen(PORT, () => {
