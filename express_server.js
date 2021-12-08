@@ -7,6 +7,14 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 
+// object to store the urls
+const urlDatabase = {
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
+};
+
+
+
 //function to generate a unique shortURL
 function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
@@ -14,12 +22,6 @@ function generateRandomString() {
 
 //set ejs as a view engine
 app.set('view engine','ejs');
-
-
-const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
-};
 
 app.get('/', (req,res) => {
   res.send("Hello!");
@@ -96,6 +98,12 @@ app.post('/login', (req,res) => {
 app.post('/logout', (req,res) => {
   res.clearCookie('username');
   res.redirect('/urls');
+});
+
+//a request handler to go to the registration form
+app.get('/register',(req,res) => {
+  const templateVariable = {username: req.cookies["username"]};
+  res.render('registration_form',templateVariable);
 });
 
 
