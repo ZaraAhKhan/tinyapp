@@ -191,6 +191,10 @@ app.post('/register',(req,res) => {
 
 //displays the login form when login form is requested
 app.get('/login',(req,res) => {
+  if (req.cookies.user_id) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVariable = {user:null};
   res.render('login_form',templateVariable);
 });
