@@ -4,6 +4,8 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 
 //function to generate a unique shortURL
 function generateRandomString() {
@@ -12,6 +14,7 @@ function generateRandomString() {
 
 //set ejs as a view engine
 app.set('view engine','ejs');
+
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca',
@@ -23,7 +26,7 @@ app.get('/', (req,res) => {
 });
 
 app.get('/urls',(req,res) => {
-  const templateVariable = {urls : urlDatabase};
+  const templateVariable = {urls : urlDatabase,username: req.cookies["username"] };
   res.render('urls_index',templateVariable);
 });
 
@@ -33,12 +36,17 @@ app.get('/hello',(req,res) => {
 
 //adding a GET route to display the form
 app.get('/urls/new',(req,res) => {
-  res.render('urls_new');
+  const templateVariable = {username: req.cookies["username"]};
+  res.render('urls_new',templateVariable);
 });
 
 //adding a second route using route parameter
 app.get('/urls/:shortURL', (req,res) => {
-  const templateVariable = {shortURL: req.params.shortURL, longURL:urlDatabase[req.params.shortURL] };
+  const templateVariable = {
+    shortURL: req.params.shortURL,
+    longURL:urlDatabase[req.params.shortURL] ,
+    username: req.cookies["username"]
+  };
   res.render('urls_show' , templateVariable);
 });
 
@@ -55,7 +63,10 @@ app.post('/urls', (req, res) => {
   urlDatabase[tempShortURL] = req.body.longURL;
   // console.log(urlDatabase);
   const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL };
-  res.render('urls_show' , templateVariable);
+  const usernameCookie = {
+    username: req.cookies["username"]
+  };
+  res.render('urls_show' , templateVariable,usernameCookie);
 });
 
 // a request handler for deleting a resource
@@ -80,6 +91,9 @@ app.post('/login', (req,res) => {
   res.cookie('username', username);
   res.redirect('/urls');
 });
+
+
+
 
 
 app.listen(PORT, () => {
