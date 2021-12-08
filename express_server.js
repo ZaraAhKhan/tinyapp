@@ -80,8 +80,8 @@ app.post('/urls/:shortURL/delete', (req,res) => {
 app.post('/urls/:shortURL', (req,res) => {
   const longURL = req.body.longURL;
   urlDatabase[req.params.shortURL] = longURL;
-  console.log(req.body);
-  console.log(req.body.longURL);
+  // console.log(req.body);
+  // console.log(req.body.longURL);
   res.redirect('/urls');
 });
 
@@ -89,6 +89,12 @@ app.post('/urls/:shortURL', (req,res) => {
 app.post('/login', (req,res) => {
   let username = req.body.username;
   res.cookie('username', username);
+  res.redirect('/urls');
+});
+
+//a request handler for logout
+app.post('/logout', (req,res) => {
+  res.clearCookie('username');
   res.redirect('/urls');
 });
 
