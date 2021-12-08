@@ -9,8 +9,14 @@ app.use(cookieParser());
 
 // object to store the urls
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  'b2xVn2': {
+    longURL:'http://www.lighthouselabs.ca',
+    userID: 'aJ48lW'
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
 
 //object to store the users information
@@ -81,6 +87,11 @@ app.get('/hello',(req,res) => {
 //displays the form to create a new url
 app.get('/urls/new',(req,res) => {
   const userId = req.cookies["user_id"];
+  if (!userId) {
+    res.status(403);
+    res.redirect('/login');
+    return;
+  }
   const templateVariable = {user:users[userId]};
   res.render('urls_new',templateVariable);
 });
@@ -90,15 +101,21 @@ app.get('/urls/:shortURL', (req,res) => {
   const userId = req.cookies["user_id"];
   const templateVariable = {
     shortURL: req.params.shortURL,
-    longURL:urlDatabase[req.params.shortURL] ,
+    longURL:urlDatabase[req.params.shortURL].longURL,
     user:users[userId]
   };
+  // console.log(templateVariable);
   res.render('urls_show',templateVariable);
 });
 
 //redirects to the website on clicking the shotr url
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+  if (!longURL) {
+    const userId = req.cookies["user_id"];
+    const templateVariable = {longURL:longURL, user:users[userId]};
+    res.render('urls_show',templateVariable);
+  }
   // console.log(req.params);
   res.redirect(longURL);
 });
@@ -106,10 +123,17 @@ app.get('/u/:shortURL', (req, res) => {
 //adding a request handler to show the all urls in table format
 app.post('/urls', (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
+  let userId = req.cookies.user_id;
+  if (!userId) {
+    res.send('Please register or login');
+    return;
+  }
   let tempShortURL = generateRandomString();
-  urlDatabase[tempShortURL] = req.body.longURL;
+  urlDatabase[tempShortURL] = {};
+  urlDatabase[tempShortURL].longURL = req.body.longURL;
+  urlDatabase[tempShortURL].userID = userId;
   // console.log(urlDatabase);
-  const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL };
+  const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL,user:users[userId]};
   res.render('urls_show' , templateVariable);
 });
 
@@ -123,7 +147,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
 // a request handler for submitting an updated longURL
 app.post('/urls/:shortURL', (req,res) => {
   const longURL = req.body.longURL;
-  urlDatabase[req.params.shortURL] = longURL;
+  urlDatabase[req.params.shortURL].longURL = longURL;
   // console.log(req.body);
   // console.log(req.body.longURL);
   res.redirect('/urls');
@@ -157,6 +181,7 @@ app.post('/logout', (req,res) => {
 //displays registration form when requested
 app.get('/register',(req,res) => {
   if (req.cookies.user_id) {
+    res.status(307);
     res.redirect('/urls');
     return;
   }
@@ -192,6 +217,7 @@ app.post('/register',(req,res) => {
 //displays the login form when login form is requested
 app.get('/login',(req,res) => {
   if (req.cookies.user_id) {
+    res.status(307);
     res.redirect('/urls');
     return;
   }
