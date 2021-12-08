@@ -13,9 +13,22 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com'
 };
 
+//object to store the users information
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
 
 
-//function to generate a unique shortURL
+//function to generate a unique shortURL and unique userID
 function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 }
@@ -28,7 +41,8 @@ app.get('/', (req,res) => {
 });
 
 app.get('/urls',(req,res) => {
-  const templateVariable = {urls : urlDatabase,username: req.cookies["username"] };
+  const userId = req.cookies["user_id"];
+  const templateVariable = {urls : urlDatabase,user:users[userId]};
   res.render('urls_index',templateVariable);
 });
 
@@ -36,18 +50,20 @@ app.get('/hello',(req,res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
-//adding a GET route to display the form
+//adding a GET route to display the form to enter a new url
 app.get('/urls/new',(req,res) => {
-  const templateVariable = {username: req.cookies["username"]};
+  const userId = req.cookies["user_id"];
+  const templateVariable = {user:users[userId]};
   res.render('urls_new',templateVariable);
 });
 
 //adding a second route using route parameter
 app.get('/urls/:shortURL', (req,res) => {
+  const userId = req.cookies["user_id"];
   const templateVariable = {
     shortURL: req.params.shortURL,
     longURL:urlDatabase[req.params.shortURL] ,
-    username: req.cookies["username"]
+    user:users[userId]
   };
   res.render('urls_show' , templateVariable);
 });
@@ -65,10 +81,7 @@ app.post('/urls', (req, res) => {
   urlDatabase[tempShortURL] = req.body.longURL;
   // console.log(urlDatabase);
   const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL };
-  const usernameCookie = {
-    username: req.cookies["username"]
-  };
-  res.render('urls_show' , templateVariable,usernameCookie);
+  res.render('urls_show' , templateVariable);
 });
 
 // a request handler for deleting a resource
@@ -102,8 +115,26 @@ app.post('/logout', (req,res) => {
 
 //a request handler to go to the registration form
 app.get('/register',(req,res) => {
-  const templateVariable = {username: req.cookies["username"]};
+  const templateVariable = {user:null};
   res.render('registration_form',templateVariable);
+});
+
+//a request handler to submit the registration form
+app.post('/register',(req,res) => {
+  const userId = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  users[userId] = {};
+  users[userId].id = userId;
+  users[userId].email = email;
+  users[userId].password = password;
+  if (email === "" || password === "") {
+    res.statusCode(400);
+    return;
+  }
+  res.cookie('user_id',userId);
+  console.log(users);
+  res.redirect('/urls');
 });
 
 
