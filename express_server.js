@@ -54,6 +54,10 @@ const authenticateUser = function(email,password,users) {
   return false;
 };
 
+//function to check if the user is loggedin
+//if the cookie exists then the user is logged in
+
+
 //sets ejs as a view engine
 app.set('view engine','ejs');
 
@@ -152,6 +156,10 @@ app.post('/logout', (req,res) => {
 
 //displays registration form when requested
 app.get('/register',(req,res) => {
+  if (req.cookies.user_id) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVariable = {user:null};
   res.render('registration_form',templateVariable);
 });
