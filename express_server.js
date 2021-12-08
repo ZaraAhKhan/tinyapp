@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+const cookieParser = require('cookie-parser');
 
 //function to generate a unique shortURL
 function generateRandomString() {
@@ -64,12 +65,19 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   res.redirect('/urls');
 });
 
-// a request handler for submiting an updated longURL
+// a request handler for submitting an updated longURL
 app.post('/urls/:shortURL', (req,res) => {
   const longURL = req.body.longURL;
   urlDatabase[req.params.shortURL] = longURL;
   console.log(req.body);
   console.log(req.body.longURL);
+  res.redirect('/urls');
+});
+
+//a request handler for login
+app.post('/login', (req,res) => {
+  let username = req.body.username;
+  res.cookie('username', username);
   res.redirect('/urls');
 });
 
