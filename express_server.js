@@ -33,6 +33,17 @@ function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 }
 
+//function to check if the email exists in the users database
+const authenticateUser = function(email,users) {
+  for (let userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 //set ejs as a view engine
 app.set('view engine','ejs');
 
@@ -124,14 +135,21 @@ app.post('/register',(req,res) => {
   const userId = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  if (email === "" || password === "") {
+    res.status(400);
+    res.send('Please enter valid email/password');
+    return;
+  }
+  const userAuthenticated = authenticateUser(email,users);
+  if (userAuthenticated) {
+    res.status(400);
+    res.send('User already exists');
+    return;
+  }
   users[userId] = {};
   users[userId].id = userId;
   users[userId].email = email;
   users[userId].password = password;
-  if (email === "" || password === "") {
-    res.statusCode(400);
-    return;
-  }
   res.cookie('user_id',userId);
   console.log(users);
   res.redirect('/urls');
