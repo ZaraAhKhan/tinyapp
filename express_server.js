@@ -110,13 +110,14 @@ app.get('/urls/:shortURL', (req,res) => {
 
 //redirects to the website on clicking the shotr url
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (!longURL) {
+  if (urlDatabase[req.params.shortURL] === undefined) {
     const userId = req.cookies["user_id"];
-    const templateVariable = {longURL:longURL, user:users[userId]};
+    const longURL = undefined;
+    const templateVariable = {longURL:longURL ,user:users[userId]};
     res.render('urls_show',templateVariable);
+    return;
   }
-  // console.log(req.params);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
