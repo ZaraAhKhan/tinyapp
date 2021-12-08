@@ -125,7 +125,6 @@ app.post('/urls/:shortURL', (req,res) => {
 app.post('/login', (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userId = generateRandomString();
   const userExists = findUserByEmail(email,users);
   if (!userExists) {
     res.status(403);
@@ -137,7 +136,7 @@ app.post('/login', (req,res) => {
     res.status(403).send('Invalid email/password');
     return;
   }
-  res.cookie('user_id', userId);
+  res.cookie('user_id', userAuthenticated.id);
   res.redirect('/urls');
 });
 
