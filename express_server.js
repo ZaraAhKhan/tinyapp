@@ -34,17 +34,27 @@ function generateRandomString() {
 }
 
 //function to check if the email exists in the users database
-const authenticateUser = function(email,users) {
+const findUserByEmail = function(email,users) {
   for (let userId in users) {
     const user = users[userId];
     if (user.email === email) {
-      return true;
+      return user;
     }
   }
   return false;
 };
 
-//set ejs as a view engine
+
+//function to check password
+const authenticateUser = function(email,password,users) {
+  const user = findUserByEmail(email,users);
+  if (user.password === password) {
+    return user;
+  }
+  return false;
+};
+
+//sets ejs as a view engine
 app.set('view engine','ejs');
 
 app.get('/', (req,res) => {
@@ -111,26 +121,39 @@ app.post('/urls/:shortURL', (req,res) => {
   res.redirect('/urls');
 });
 
-//a request handler for login
+//logsin the user, creates cookie and redirects to urls_index
 app.post('/login', (req,res) => {
-  let username = req.body.username;
-  res.cookie('username', username);
+  const email = req.body.email;
+  const password = req.body.password;
+  const userId = generateRandomString();
+  const userExists = findUserByEmail(email,users);
+  if (!userExists) {
+    res.status(403);
+    res.send('User cannot be found');
+    return;
+  }
+  const userAuthenticated = authenticateUser(email,password,users);
+  if (!userAuthenticated) {
+    res.status(403).send('Invalid email/password');
+    return;
+  }
+  res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
-//a request handler for logout
+//clears cookies after logout and redirects to urls_index
 app.post('/logout', (req,res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
-//a request handler to go to the registration form
+//displays registration form when requested
 app.get('/register',(req,res) => {
   const templateVariable = {user:null};
   res.render('registration_form',templateVariable);
 });
 
-//a request handler to submit the registration form
+//submits and validates registration form and redireests to url_index page
 app.post('/register',(req,res) => {
   const userId = generateRandomString();
   const email = req.body.email;
@@ -140,8 +163,8 @@ app.post('/register',(req,res) => {
     res.send('Please enter valid email/password');
     return;
   }
-  const userAuthenticated = authenticateUser(email,users);
-  if (userAuthenticated) {
+  const userExists = findUserByEmail(email,users);
+  if (userExists) {
     res.status(400);
     res.send('User already exists');
     return;
@@ -153,6 +176,12 @@ app.post('/register',(req,res) => {
   res.cookie('user_id',userId);
   console.log(users);
   res.redirect('/urls');
+});
+
+//diplays the login form when login form is requested
+app.get('/login',(req,res) => {
+  const templateVariable = {user:null};
+  res.render('login_form',templateVariable);
 });
 
 
