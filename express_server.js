@@ -111,6 +111,7 @@ app.get('/urls/:shortURL', (req,res) => {
   let templateVariable = {};
   let usersUrls = urlsForUser(userId);
   let arrayOfURL = Object.keys(usersUrls);
+  let arrayOfDbURLS = Object.keys(urlDatabase);
   if (arrayOfURL.includes(req.params.shortURL)) {
     templateVariable = {
       shortURL: req.params.shortURL,
@@ -119,22 +120,33 @@ app.get('/urls/:shortURL', (req,res) => {
     };
   } else {
     templateVariable = {
+      shortURL: undefined,
       longURL:undefined,
       user:users[userId]
     };
+    res.status(403);
+  }
+  if (!arrayOfDbURLS.includes(req.params.shortURL)) {
+    templateVariable = {
+      shortURL:req.params.shortURL,
+      longURL:undefined,
+      user:users[userId]
+    };
+    res.status(400);
   }
   console.log(templateVariable);
   res.render('urls_show',templateVariable);
   
 });
 
-//redirects to the website on clicking the shotr url
+//redirects to the website on clicking the short url
 app.get('/u/:shortURL', (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) {
     const userId = req.cookies["user_id"];
     const longURL = undefined;
     const templateVariable = {longURL:longURL ,user:users[userId]};
     res.render('urls_show',templateVariable);
+    res.status(400);
     return;
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
@@ -147,6 +159,7 @@ app.post('/urls', (req, res) => {
   let userId = req.cookies.user_id;
   if (!userId) {
     res.send('Please register or login');
+    res.status(400);
     return;
   }
   let tempShortURL = generateRandomString();
@@ -160,15 +173,30 @@ app.post('/urls', (req, res) => {
 
 // a request handler for deleting a url
 app.post('/urls/:shortURL/delete', (req,res) => {
+  let userId = req.cookies.user_id;
+  let usersURLObj = urlsForUser(userId);
   const toBeDeletedURL = req.params.shortURL;
-  delete urlDatabase[toBeDeletedURL];
+  let arrayOfURLS = Object.keys(usersURLObj);
+  if (arrayOfURLS.includes(toBeDeletedURL)) {
+    delete urlDatabase[toBeDeletedURL];
+  } else {
+    res.status(403);
+  }
   res.redirect('/urls');
 });
 
 // a request handler for submitting an updated longURL
 app.post('/urls/:shortURL', (req,res) => {
-  const longURL = req.body.longURL;
-  urlDatabase[req.params.shortURL].longURL = longURL;
+  let userId = req.cookies.user_id;
+  let usersURLObj = urlsForUser(userId);
+  const toBeEditedURL = req.params.shortURL;
+  let arrayOfURLS = Object.keys(usersURLObj);
+  if (arrayOfURLS.includes(toBeEditedURL)) {
+    const longURL = req.body.longURL;
+    urlDatabase[req.params.shortURL].longURL = longURL;
+  } else {
+    res.status(403);
+  }
   // console.log(req.body);
   // console.log(req.body.longURL);
   res.redirect('/urls');
