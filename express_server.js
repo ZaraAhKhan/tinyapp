@@ -92,7 +92,7 @@ app.get('/', (req,res) => {
 
 //displays url_index page
 app.get('/urls',(req,res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   const urlObject = urlsForUser(userId);
   const templateVariable = {urls : urlObject,user:users[userId]};
   res.render('urls_index',templateVariable);
@@ -105,7 +105,7 @@ app.get('/hello',(req,res) => {
 
 //displays the form to create a new url
 app.get('/urls/new',(req,res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   if (!userId) {
     return res.status(403).redirect('/login');
   }
@@ -115,7 +115,7 @@ app.get('/urls/new',(req,res) => {
 
 //displays the longurl and shorturl and edit form
 app.get('/urls/:shortURL', (req,res) => {
-  const userId = req.cookies["user_id"];
+  const userId = req.session.user_id;
   let templateVariable = {};
   let usersUrls = urlsForUser(userId);
   let arrayOfURL = Object.keys(usersUrls);
@@ -149,7 +149,7 @@ app.get('/urls/:shortURL', (req,res) => {
 //redirects to the website on clicking the short url
 app.get('/u/:shortURL', (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) {
-    const userId = req.cookies["user_id"];
+    const userId = req.session.user_id;
     const longURL = undefined;
     const templateVariable = {longURL:longURL ,user:users[userId]};
     return res.status(400).render('urls_show',templateVariable);
@@ -161,7 +161,7 @@ app.get('/u/:shortURL', (req, res) => {
 //adding a request handler to show the all urls in table format
 app.post('/urls', (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
-  let userId = req.cookies.user_id;
+  let userId = req.session.user_id;
   if (!userId) {
     return res.status(400).send('Please register or login');
   }
@@ -176,7 +176,7 @@ app.post('/urls', (req, res) => {
 
 // a request handler for deleting a url
 app.post('/urls/:shortURL/delete', (req,res) => {
-  let userId = req.cookies.user_id;
+  let userId = req.session.user_id;
   let usersURLObj = urlsForUser(userId);
   const toBeDeletedURL = req.params.shortURL;
   let arrayOfURLS = Object.keys(usersURLObj);
@@ -190,7 +190,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
 
 // a request handler for submitting an updated longURL
 app.post('/urls/:shortURL', (req,res) => {
-  let userId = req.cookies.user_id;
+  let userId = req.session.user_id;
   let usersURLObj = urlsForUser(userId);
   const toBeEditedURL = req.params.shortURL;
   let arrayOfURLS = Object.keys(usersURLObj);
@@ -217,19 +217,19 @@ app.post('/login', (req,res) => {
   if (!userAuthenticated) {
     return res.status(403).send('Invalid email/password');
   }
-  res.cookie('user_id', userAuthenticated.id);
+  req.session.user_id = userAuthenticated.id;
   res.redirect('/urls');
 });
 
 //clears cookies after logout and redirects to urls_index
 app.post('/logout', (req,res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
 //displays registration form when requested
 app.get('/register',(req,res) => {
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     return res.status(307).redirect('/urls');
   }
   const templateVariable = {user:null};
@@ -253,14 +253,14 @@ app.post('/register',(req,res) => {
   users[userId].id = userId;
   users[userId].email = email;
   users[userId].password = hashedPassword;
-  res.cookie('user_id',userId);
+  req.session.user_id = userId;
   console.log(users);
   res.redirect('/urls');
 });
 
 //displays the login form when login form is requested
 app.get('/login',(req,res) => {
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     return res.status(307).redirect('/urls');
   }
   const templateVariable = {user:null};
