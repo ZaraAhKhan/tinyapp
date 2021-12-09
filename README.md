@@ -5,7 +5,7 @@ Use the TinyApp for your next tweet to say more!
 
 ## Final Product
 
-!["screenshot description"](#)
+!["Create new URL's in this app"](https://github.com/ZaraAhKhan/tinyapp/blob/main/docs/create-url-page.png?raw=true)
 
 !["screenshot description"](#)
 
