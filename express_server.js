@@ -55,7 +55,11 @@ const findUserByEmail = function(email,users) {
 //function to check password
 const authenticateUser = function(email,password,users) {
   const user = findUserByEmail(email,users);
-  if (user.password === password) {
+  const result = bcrypt.compareSync(password,user.password);
+  console.log(user.password);
+  console.log(password);
+  console.log(result);
+  if (result === true) {
     return user;
   }
   return false;
