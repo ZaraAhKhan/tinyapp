@@ -4,7 +4,7 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-const {findUserByEmail} = require('./helper.js');
+const { findUserByEmail } = require('./helper.js');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
