@@ -12,7 +12,8 @@ app.use(cookieSession({
   keys: ['key1','key2']
 }));
 
-
+//sets ejs as a view engine
+app.set('view engine','ejs');
 
 // object to store the urls
 const urlDatabase = {
@@ -42,20 +43,15 @@ const users = {
 
 
 //function to generate a unique shortURL and unique userID
-function generateRandomString() {
+const generateRandomString = function() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
-}
-
-
+};
 
 
 //function to check password
 const authenticateUser = function(email,password,users) {
   const user = findUserByEmail(email,users);
   const result = bcrypt.compareSync(password,user.password);
-  console.log(user.password);
-  console.log(password);
-  console.log(result);
   if (result === true) {
     return user;
   }
@@ -74,10 +70,7 @@ const urlsForUser = function(id) {
   return urlObject;
 };
 
-//sets ejs as a view engine
-app.set('view engine','ejs');
-
-//displays hello
+//displays login or index page
 app.get('/', (req,res) => {
   if (req.session.user_id) {
     return res.redirect('/urls');
@@ -112,9 +105,9 @@ app.get('/urls/new',(req,res) => {
 app.get('/urls/:shortURL', (req,res) => {
   const userId = req.session.user_id;
   let templateVariable = {};
-  let usersUrls = urlsForUser(userId);
-  let arrayOfURL = Object.keys(usersUrls);
-  let arrayOfDbURLS = Object.keys(urlDatabase);
+  const usersUrls = urlsForUser(userId);
+  const arrayOfURL = Object.keys(usersUrls);
+  const arrayOfDbURLS = Object.keys(urlDatabase);
   if (arrayOfURL.includes(req.params.shortURL)) {
     templateVariable = {
       shortURL: req.params.shortURL,
@@ -136,9 +129,7 @@ app.get('/urls/:shortURL', (req,res) => {
       user:users[userId]
     };
   }
-  console.log(templateVariable);
   res.render('urls_show',templateVariable);
-  
 });
 
 //redirects to the website on clicking the short url
@@ -146,7 +137,8 @@ app.get('/u/:shortURL', (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) {
     const userId = req.session.user_id;
     const longURL = undefined;
-    const templateVariable = {longURL:longURL ,user:users[userId]};
+    const shortURL = [req.params.shortURL];
+    const templateVariable = {longURL ,shortURL,user:users[userId]};
     return res.status(400).render('urls_show',templateVariable);
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
@@ -155,7 +147,6 @@ app.get('/u/:shortURL', (req, res) => {
 
 //adding a request handler to show the all urls in table format
 app.post('/urls', (req, res) => {
-  // console.log(req.body);  // Log the POST request body to the console
   let userId = req.session.user_id;
   if (!userId) {
     return res.status(400).send('Please register or login');
@@ -164,7 +155,6 @@ app.post('/urls', (req, res) => {
   urlDatabase[tempShortURL] = {};
   urlDatabase[tempShortURL].longURL = req.body.longURL;
   urlDatabase[tempShortURL].userID = userId;
-  // console.log(urlDatabase);
   const templateVariable = {shortURL: tempShortURL, longURL:req.body.longURL,user:users[userId]};
   res.render('urls_show' , templateVariable);
 });
@@ -195,8 +185,6 @@ app.post('/urls/:shortURL', (req,res) => {
   } else {
     return res.status(403).send(`You do not have authorization!`);
   }
-  // console.log(req.body);
-  // console.log(req.body.longURL);
   res.redirect('/urls');
 });
 
