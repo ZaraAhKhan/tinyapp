@@ -2,10 +2,15 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
 const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session');
+
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1','key2']
+}));
+
 
 
 // object to store the urls
@@ -102,9 +107,7 @@ app.get('/hello',(req,res) => {
 app.get('/urls/new',(req,res) => {
   const userId = req.cookies["user_id"];
   if (!userId) {
-    res.status(403);
-    res.redirect('/login');
-    return;
+    return res.status(403).redirect('/login');
   }
   const templateVariable = {user:users[userId]};
   res.render('urls_new',templateVariable);
@@ -129,7 +132,7 @@ app.get('/urls/:shortURL', (req,res) => {
       longURL:undefined,
       user:users[userId]
     };
-    res.status(403);
+
   }
   if (!arrayOfDbURLS.includes(req.params.shortURL)) {
     templateVariable = {
@@ -137,7 +140,6 @@ app.get('/urls/:shortURL', (req,res) => {
       longURL:undefined,
       user:users[userId]
     };
-    res.status(400);
   }
   console.log(templateVariable);
   res.render('urls_show',templateVariable);
@@ -150,9 +152,7 @@ app.get('/u/:shortURL', (req, res) => {
     const userId = req.cookies["user_id"];
     const longURL = undefined;
     const templateVariable = {longURL:longURL ,user:users[userId]};
-    res.render('urls_show',templateVariable);
-    res.status(400);
-    return;
+    return res.status(400).render('urls_show',templateVariable);
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
@@ -163,9 +163,7 @@ app.post('/urls', (req, res) => {
   // console.log(req.body);  // Log the POST request body to the console
   let userId = req.cookies.user_id;
   if (!userId) {
-    res.send('Please register or login');
-    res.status(400);
-    return;
+    return res.status(400).send('Please register or login');
   }
   let tempShortURL = generateRandomString();
   urlDatabase[tempShortURL] = {};
@@ -185,7 +183,7 @@ app.post('/urls/:shortURL/delete', (req,res) => {
   if (arrayOfURLS.includes(toBeDeletedURL)) {
     delete urlDatabase[toBeDeletedURL];
   } else {
-    res.status(403);
+    return res.status(403).send('You don\'t have the authorization!');
   }
   res.redirect('/urls');
 });
@@ -200,7 +198,7 @@ app.post('/urls/:shortURL', (req,res) => {
     const longURL = req.body.longURL;
     urlDatabase[req.params.shortURL].longURL = longURL;
   } else {
-    res.status(403);
+    return res.status(403).send(`You do not have authorization!`);
   }
   // console.log(req.body);
   // console.log(req.body.longURL);
@@ -213,14 +211,11 @@ app.post('/login', (req,res) => {
   const password = req.body.password;
   const userExists = findUserByEmail(email,users);
   if (!userExists) {
-    res.status(403);
-    res.send('User cannot be found');
-    return;
+    return res.status(403).send('User cannot be found');
   }
   const userAuthenticated = authenticateUser(email,password,users);
   if (!userAuthenticated) {
-    res.status(403).send('Invalid email/password');
-    return;
+    return res.status(403).send('Invalid email/password');
   }
   res.cookie('user_id', userAuthenticated.id);
   res.redirect('/urls');
@@ -235,9 +230,7 @@ app.post('/logout', (req,res) => {
 //displays registration form when requested
 app.get('/register',(req,res) => {
   if (req.cookies.user_id) {
-    res.status(307);
-    res.redirect('/urls');
-    return;
+    return res.status(307).redirect('/urls');
   }
   const templateVariable = {user:null};
   res.render('registration_form',templateVariable);
@@ -249,15 +242,11 @@ app.post('/register',(req,res) => {
   const email = req.body.email;
   const password = req.body.password;
   if (email === "" || password === "") {
-    res.status(400);
-    res.send('Please enter valid email/password');
-    return;
+    return res.status(400).send('Please enter valid email/password');
   }
   const userExists = findUserByEmail(email,users);
   if (userExists) {
-    res.status(400);
-    res.send('User already exists');
-    return;
+    return res.status(400).send('User already exists');
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
   users[userId] = {};
@@ -272,9 +261,7 @@ app.post('/register',(req,res) => {
 //displays the login form when login form is requested
 app.get('/login',(req,res) => {
   if (req.cookies.user_id) {
-    res.status(307);
-    res.redirect('/urls');
-    return;
+    return res.status(307).redirect('/urls');
   }
   const templateVariable = {user:null};
   res.render('login_form',templateVariable);
