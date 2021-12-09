@@ -9,7 +9,7 @@ app.use(cookieParser());
 
 // object to store the urls
 const urlDatabase = {
-  'b2xVn2': {
+  b2xVn2: {
     longURL:'http://www.lighthouselabs.ca',
     userID: 'aJ48lW'
   },
@@ -60,9 +60,17 @@ const authenticateUser = function(email,password,users) {
   return false;
 };
 
-//function to check if the user is loggedin
-//if the cookie exists then the user is logged in
-
+//function to loop through the database to match userID to user
+const urlsForUser = function(id) {
+  let urlObject = {};
+  for (let url in urlDatabase) {
+    let urlInDb = urlDatabase[url];
+    if (urlInDb['userID'] === id) {
+      urlObject[url] = urlDatabase[url].longURL;
+    }
+  }
+  return urlObject;
+};
 
 //sets ejs as a view engine
 app.set('view engine','ejs');
@@ -75,7 +83,8 @@ app.get('/', (req,res) => {
 //displays url_index page
 app.get('/urls',(req,res) => {
   const userId = req.cookies["user_id"];
-  const templateVariable = {urls : urlDatabase,user:users[userId]};
+  const urlObject = urlsForUser(userId);
+  const templateVariable = {urls : urlObject,user:users[userId]};
   res.render('urls_index',templateVariable);
 });
 
@@ -104,7 +113,7 @@ app.get('/urls/:shortURL', (req,res) => {
     longURL:urlDatabase[req.params.shortURL].longURL,
     user:users[userId]
   };
-  // console.log(templateVariable);
+  console.log(templateVariable);
   res.render('urls_show',templateVariable);
 });
 
