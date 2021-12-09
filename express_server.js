@@ -4,6 +4,7 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
+const {findUserByEmail} = require('./helper.js');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -45,16 +46,7 @@ function generateRandomString() {
   return Math.floor((1 + Math.random()) * 0x1000000).toString(16).substring(1);
 }
 
-//function to check if the email exists in the users database
-const findUserByEmail = function(email,users) {
-  for (let userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return false;
-};
+
 
 
 //function to check password
@@ -70,7 +62,7 @@ const authenticateUser = function(email,password,users) {
   return false;
 };
 
-//function to loop through the database to match userID to user
+//function to return urls associated with user
 const urlsForUser = function(id) {
   let urlObject = {};
   for (let url in urlDatabase) {
