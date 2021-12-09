@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+const bcrypt = require('bcryptjs');
 
 
 // object to store the urls
@@ -254,10 +255,11 @@ app.post('/register',(req,res) => {
     res.send('User already exists');
     return;
   }
+  const hashedPassword = bcrypt.hashSync(password, 10);
   users[userId] = {};
   users[userId].id = userId;
   users[userId].email = email;
-  users[userId].password = password;
+  users[userId].password = hashedPassword;
   res.cookie('user_id',userId);
   console.log(users);
   res.redirect('/urls');
