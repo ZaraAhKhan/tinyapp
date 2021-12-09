@@ -19,6 +19,7 @@ Use the TinyApp for your next tweet to say more!
 - bcrypt
 - body-parser
 - cookie-session
+- method-override
 
 ## Dev Dependencies
 - mocha
