@@ -8,9 +8,14 @@
 
 <body>
   <%- include('partials/_header') %>
-  <% if(longURL === undefined) { %>
+  <% if(user === undefined && longURl === undefined) { %>
     <div class="alert alert-danger" role="alert">
-      The short URL does not exist!
+      Please login or register!
+    </div>
+    <% } %>
+    <% if(longURL === undefined) { %>
+    <div class="alert alert-danger" role="alert">
+      The short URL does not exist/You do not have authorization!
     </div>
     <% } else { %>
   <div class="card text-center">

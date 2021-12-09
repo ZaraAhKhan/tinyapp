@@ -108,13 +108,24 @@ app.get('/urls/new',(req,res) => {
 //displays the longurl and shorturl and edit form
 app.get('/urls/:shortURL', (req,res) => {
   const userId = req.cookies["user_id"];
-  const templateVariable = {
-    shortURL: req.params.shortURL,
-    longURL:urlDatabase[req.params.shortURL].longURL,
-    user:users[userId]
-  };
+  let templateVariable = {};
+  let usersUrls = urlsForUser(userId);
+  let arrayOfURL = Object.keys(usersUrls);
+  if (arrayOfURL.includes(req.params.shortURL)) {
+    templateVariable = {
+      shortURL: req.params.shortURL,
+      longURL:urlDatabase[req.params.shortURL].longURL,
+      user:users[userId]
+    };
+  } else {
+    templateVariable = {
+      longURL:undefined,
+      user:users[userId]
+    };
+  }
   console.log(templateVariable);
   res.render('urls_show',templateVariable);
+  
 });
 
 //redirects to the website on clicking the shotr url
