@@ -9,7 +9,7 @@ Use the TinyApp for your next tweet to say more!
 
 !["Create new URL's in this app"](https://github.com/ZaraAhKhan/tinyapp/blob/main/docs/create-url-page.png?raw=true)
 
-!["Home Page"](https://github.com/ZaraAhKhan/tinyapp/blob/main/docs/urls-page.png?raw=true)
+!["Edit URL's on this page"](https://github.com/ZaraAhKhan/tinyapp/blob/main/docs/edit-page.png?raw=true)
 
 ## Dependencies
 
